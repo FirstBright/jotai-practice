@@ -1,15 +1,18 @@
 import { decimalAtom } from "@/atoms/decimal"
 import { inputValueAtom } from "@/atoms/inputvalue"
+import { unitAtom } from "@/atoms/unit"
 import { useAtom } from "jotai"
-import { ChangeEvent, useState, useEffect } from "react"
+import { ChangeEvent } from "react"
 
 export function Calculator() {
     const [inputValue, setInputValue] = useAtom(inputValueAtom)
     const [decimalPlaces, setDecimalPlaces] = useAtom(decimalAtom)
-    const [unit, setUnit] = useState("m/s")
+    const [_, setUnit] = useAtom(unitAtom)
+    let result
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value
+        result = value
         if (!isNaN(Number(value))) {
             setInputValue(value)
         }
@@ -17,32 +20,12 @@ export function Calculator() {
 
     const handleUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setUnit(e.currentTarget.value)
-        calculateSpeed()
     }
 
     const handleDecimalChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value
         if (!isNaN(Number(value))) {
             setDecimalPlaces(Number(value))
-        }
-    }
-
-    const calculateSpeed = () => {
-        switch (unit) {
-            case "km/h":
-                setInputValue(String((Number(inputValue) * 1000) / 360))
-                break
-            case "mph":
-                setInputValue(String((Number(inputValue) * 1609.34) / 360))
-                break
-            case "fps":
-                setInputValue(String(Number(inputValue) * 0.3048))
-                break
-            case "kt":
-                setInputValue(String((Number(inputValue) * 1852) / 360))
-                break
-            default:
-                setInputValue(inputValue)
         }
     }
 
@@ -57,7 +40,6 @@ export function Calculator() {
                     <input
                         type='text'
                         autoFocus
-                        defaultValue=''
                         className='p-2 border border-gray-300 rounded mb-4 w-full'
                         value={inputValue}
                         onChange={handleChange}
