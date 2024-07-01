@@ -1,3 +1,3 @@
 import { atom } from "jotai"
 
-export const inputValueAtom = atom(0)
+export const inputValueAtom = atom("")

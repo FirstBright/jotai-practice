@@ -1,41 +1,101 @@
+import { decimalAtom } from "@/atoms/decimal"
 import { inputValueAtom } from "@/atoms/inputvalue"
 import { useAtom } from "jotai"
-import { ChangeEvent } from "react"
+import { ChangeEvent, useState, useEffect } from "react"
 
-export function Calcluator(){
+export function Calculator() {
     const [inputValue, setInputValue] = useAtom(inputValueAtom)
+    const [decimalPlaces, setDecimalPlaces] = useAtom(decimalAtom)
+    const [unit, setUnit] = useState("m/s")
+
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setInputValue(parseInt(e.currentTarget.value))
+        const value = e.currentTarget.value
+        if (!isNaN(Number(value))) {
+            setInputValue(value)
+        }
     }
+
+    const handleUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        setUnit(e.currentTarget.value)
+        calculateSpeed()
+    }
+
+    const handleDecimalChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const value = e.currentTarget.value
+        if (!isNaN(Number(value))) {
+            setDecimalPlaces(Number(value))
+        }
+    }
+
+    const calculateSpeed = () => {
+        switch (unit) {
+            case "km/h":
+                setInputValue(String((Number(inputValue) * 1000) / 360))
+                break
+            case "mph":
+                setInputValue(String((Number(inputValue) * 1609.34) / 360))
+                break
+            case "fps":
+                setInputValue(String(Number(inputValue) * 0.3048))
+                break
+            case "kt":
+                setInputValue(String((Number(inputValue) * 1852) / 360))
+                break
+            default:
+                setInputValue(inputValue)
+        }
+    }
+
     return (
         <>
-        <div className='flex flex-col items-center'>                
-                <p>계산기</p>
-                <p>속도를 입력하고 단위를 선택하십시오</p>
+            <div className='flex flex-col items-center p-4'>
+                <p className='text-xl font-bold'>계산기</p>
+                <p className='text-sm mb-4'>
+                    속도를 입력하고 단위를 선택하십시오
+                </p>
+                <div className='flex flex-col items-center w-full max-w-xs'>
+                    <input
+                        type='text'
+                        autoFocus
+                        defaultValue=''
+                        className='p-2 border border-gray-300 rounded mb-4 w-full'
+                        value={inputValue}
+                        onChange={handleChange}
+                    />
+                    <select
+                        name='measure'
+                        id='measure'
+                        className='p-2 border border-gray-300 rounded mb-4 w-full'
+                        onChange={handleUnitChange}
+                    >
+                        <optgroup label='미터 단위'>
+                            <option value='m/s'>m/s</option>
+                            <option value='km/h'>km/h</option>
+                        </optgroup>
+                        <optgroup label='기타 단위'>
+                            <option value='mph'>mph</option>
+                            <option value='fps'>fps</option>
+                            <option value='kt'>kt</option>
+                        </optgroup>
+                    </select>
+                    <div className='flex items-center mb-4'>
+                        <label className='mr-2'>소수점</label>
+                        <input
+                            type='text'
+                            className='p-2 border border-gray-300 rounded w-16 text-center'
+                            value={decimalPlaces}
+                            onChange={handleDecimalChange}
+                        />
+                        <span className='ml-2'>자리로 반올림</span>
+                    </div>
+                    <button
+                        className='p-2 bg-red-500 text-white rounded'
+                        onClick={() => setInputValue("")}
+                    >
+                        삭제
+                    </button>
+                </div>
             </div>
-            <input
-                type='number'
-                className='border-gray-700 focus:border-gray-700 transition-all ease-in'
-                value={inputValue}
-                onChange={handleChange}
-            />
-            <select name='measure' id='measure'>
-                <optgroup label='미터 단위'>
-                    <option>m/s</option>
-                    <option>km/h</option>
-                </optgroup>
-                <optgroup label='기타 단위'>
-                    <option>mph</option>
-                    <option>fps</option>
-                    <option>kt</option>
-                </optgroup>
-            </select>
-            <div>
-                소수점 <input type='text' />
-                자리로 반올림
-            </div>
-            <button>계산</button>
-            <button>삭제</button>
         </>
     )
 }
